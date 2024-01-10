@@ -1,0 +1,66 @@
+﻿@model Nop.Plugin.Widgets.SalesCampaigns.Models.SalesCampaignsModel
+@inject Nop.Core.IWebHelper webHelper
+@inject IStoreService storeService
+@using Nop.Plugin.Widgets.SalesCampaigns.Domain
+@using Nop.Core.Domain.Catalog;
+@using Nop.Services
+@using Nop.Services.Stores
+@using Nop.Web.Areas.Admin.Models.Catalog
+@using Nop.Plugin.Widgets.SalesCampaigns.Models
+@{
+    Layout = "";
+}
+<link rel="stylesheet" href="~/Plugins/Widgets.SalesCampaigns/Content/css/SalesCampaigns.css" />
+<input asp-for="Id" type="hidden" />
+
+
+<div class="preview_note">
+    <nop-cards id="salesCampaignspreview-cards">
+        <div class="card card-default">
+            <div class="card-body">
+                <p>
+                    @Html.Raw(string.Format(T("Plugins.Widgets.SalesCampaigns.Fields.Preview.Note").Text, webHelper.GetStoreLocation()))
+                </p>
+            </div>
+        </div>
+    </nop-cards>
+</div>
+
+
+
+
+@if (Model.Id > 0)
+{
+    <div class="card-body">
+        @await Html.PartialAsync("Table", new DataTablesModel
+   {
+       Name = "preview-grid",
+       UrlRead = new DataUrl("SalesCampaignsProductPreviewList", "SalesCampaigns", new RouteValueDictionary { [nameof(Model.PreviewSearchModel.SalesCampaignId)] = Model.Id }),
+       SearchButtonId = "search-products",
+       Length = Model.PreviewSearchModel.PageSize,
+       LengthMenu = Model.PreviewSearchModel.AvailablePageSizes,
+       ColumnCollection = new List<ColumnProperty>
+            {
+                new ColumnProperty(nameof(SalesCampaignsProductModel.ProductName))
+                {
+                    Title = T("Admin.Catalog.Products.Fields.Name").Text
+                },
+                 new ColumnProperty(nameof(SalesCampaignsProductModel.Price))
+                 {
+                     Title = T("Admin.Catalog.Products.Fields.Price").Text
+                 },
+                  new ColumnProperty(nameof(SalesCampaignsProductModel.SalePrice))
+                 {
+                     Title = T("Plugins.Widgets.SalesCampaigns.Fields.SalePrice").Text
+                 }
+            }
+   })
+    </div>
+}
+else
+{
+<div class="card-body">
+    @T("Plugins.Widgets.SalesCampaigns.Categories.Products.SaveBeforeEdit")
+</div>
+}
+

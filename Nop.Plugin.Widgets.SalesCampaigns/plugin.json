@@ -1,0 +1,12 @@
+﻿{
+  "Group": "Widgets",
+  "FriendlyName": "Sales Campaigns",
+  "SystemName": "Widgets.SalesCampaigns",
+  "Version": "1.0",
+  "SupportedVersions": [ "4.50" ],
+  "Author": "Tmotions Team",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Widgets.SalesCampaigns.dll",
+  "Description": "This plugin is use for Sales Campaigns."
+}
+

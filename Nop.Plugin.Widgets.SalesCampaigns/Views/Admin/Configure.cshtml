@@ -1,0 +1,38 @@
+﻿@using Nop.Plugin.Widgets.SalesCampaigns.Models
+@model ConfigurationModel
+
+@{
+    Layout = "_AdminLayout";
+    ViewBag.PageTitle = T("Plugins.Widgets.SalesCampaigns.Menu.Settings").Text;
+    NopHtml.SetActiveMenuItemSystemName("SalesCampaigns.Settings");
+}
+
+<form asp-controller="SalesCampaigns" asp-action="Configure" method="post">
+    <div class="content-header clearfix">
+        <h1 class="float-left">
+            @T("Plugins.Widgets.SalesCampaigns.Admin.Configuration.Settings")
+        </h1>
+    </div>
+    <section class="content">
+        <div class="cards-group">
+            <div class="card card-default">
+
+                <div class="card-body">
+                    <div class="form-group row">
+                        <div class="col-md-1 text-right">
+                            <nop-editor asp-for="Enable" />
+                            <span asp-validation-for="Enable"></span>
+                        </div>
+                        <div class="col-md-2">
+                            <nop-override-store-checkbox asp-for="Enable_OverrideForStore" asp-input="Enable" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                            <nop-label asp-for="Enable" />
+                        </div>
+                        <div class="col-md-9">
+                            <input type="submit" name="save" class="btn btn-primary svbtn" value="Save" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</form>

@@ -1,0 +1,170 @@
+﻿@model Nop.Plugin.Widgets.SalesCampaigns.Models.SalesCampaignsModel
+@inject Nop.Core.IWebHelper webHelper
+@inject IStoreService storeService
+@using Nop.Plugin.Widgets.SalesCampaigns.Domain
+@using Nop.Core.Domain.Catalog;
+@using Nop.Services
+@using Nop.Services.Stores
+@{
+    Layout = "";
+}
+
+
+<div class="card-body">
+
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="Name" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="Name" />
+            <span asp-validation-for="Name"></span>
+        </div>
+    </div>
+
+    @*Comment The Category Dropdown & Assign To Category Checkbox*@
+
+
+    @*<div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="AssignToCategory" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="AssignToCategory" />
+                <span asp-validation-for="AssignToCategory"></span>
+            </div>
+        </div>*@
+
+    @*use category dropdown from nop category*@
+
+    @*<div class="form-group row" id="searchCategoryId">
+            <div class="col-md-3">
+                <nop-label asp-for="SearchCategoryId" />
+            </div>
+            <div class="col-md-9">
+                <nop-select asp-for="SearchCategoryId" asp-items="Model.AvailableCategories" />
+                <span asp-validation-for="SearchCategoryId"></span>
+            </div>
+        </div>*@
+
+    @*use enum WidgetZone dropdown*@
+
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="WidgetZoneId" />
+        </div>
+        <div class="col-md-9">
+            <nop-select asp-for="WidgetZoneId" asp-items="@await (((WidgetZone)Model.WidgetZoneId).ToSelectListAsync())" />
+            <span asp-validation-for="WidgetZoneId"></span>
+        </div>
+    </div>
+
+    @*use enum DiscountType dropdown*@
+
+    <div class="form-group row" id="discountTypeId">
+        <div class="col-md-3">
+            <nop-label asp-for="DiscountTypeId" />
+        </div>
+        <div class="col-md-9">
+            <nop-select asp-for="DiscountTypeId" asp-items="@await (((DiscountType)Model.DiscountTypeId).ToSelectListAsync())" />
+            <span asp-validation-for="DiscountTypeId"></span>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="DiscountValue" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="DiscountValue" />
+            <span asp-validation-for="DiscountValue"></span>
+        </div>
+    </div>
+
+    <div class="form-group row" id="overrideCents">
+        <div class="col-md-3">
+            <nop-label asp-for="OverrideCents" />
+        </div>
+
+        <div class="col-md-9">
+            <nop-editor asp-for="OverrideCents" />
+            <span asp-validation-for="OverrideCents"></span>
+        </div>
+    </div>
+
+    <div class="form-group row" id="overrideCentsValue">
+        <div class="col-md-3">
+            <nop-label asp-for="OverrideCentsValue" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="OverrideCentsValue" />
+            <span asp-validation-for="OverrideCentsValue"></span>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    /*for Category column */
+    $(document).ready(function() {
+        $("#@Html.IdFor(model => model.AssignToCategory)").click(toggleTax);
+
+        toggleTax();
+    });
+
+    function toggleTax() {
+        if ($('#@Html.IdFor(model => model.AssignToCategory)').is(':checked')) {
+            $('#searchCategoryId').showElement();
+
+        } else {
+            $('#searchCategoryId').hideElement();
+        }
+    }
+
+     /*for discount column */
+     $(document).ready(function() {
+        $("#@Html.IdFor(model => model.OverrideCents)").click(toggleTax);
+
+        toggleTax();
+    });
+
+    function toggleTax() {
+        if ($('#@Html.IdFor(model => model.OverrideCents)').is(':checked')) {
+            $('#overrideCentsValue').showElement();
+
+        } else {
+            $('#overrideCentsValue').hideElement();
+        }
+    }
+</script>
+
+<script>
+   ////////////////////////
+
+    $(document).ready(function() {
+
+        $("#@Html.IdFor(model => model.DiscountTypeId)").change(toggleDiscountType);
+
+        toggleDiscountType();
+    });
+
+    function toggleDiscountType() {
+        var percentageId = "@((int)DiscountType.Percentage)";
+        var fixedAmountId = "@((int)DiscountType.FixedAmount)";
+
+        var selectedDiscountTypeId = $("#@Html.IdFor(model => model.DiscountTypeId)").val();
+        if (selectedDiscountTypeId != percentageId) {
+            $('#overrideCents').hideElement();
+            $('#overrideCentsValue').hideElement();
+        }
+        else if (selectedDiscountTypeId != fixedAmountId) {
+            $('#overrideCents').showElement();
+            if ($('#@Html.IdFor(model => model.OverrideCents)').is(':checked')) {
+            $('#overrideCentsValue').showElement();
+        }
+        }
+    }
+
+
+</script>

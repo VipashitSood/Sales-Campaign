@@ -1,0 +1,150 @@
+﻿@model Nop.Plugin.Widgets.SalesCampaigns.Models.SalesCampaignsModel
+
+@inject Nop.Core.IWebHelper webHelper
+@inject IStoreService storeService
+@using Nop.Plugin.Widgets.SalesCampaigns.Domain
+@using Nop.Core.Domain.Catalog;
+@using Nop.Services
+@using Nop.Services.Stores
+
+@{
+    Layout = "";
+}
+
+<div class="panel-body">
+    <nop-tabs id="salescampaigns-edit">
+        <nop-tab asp-name="tab-setting" asp-title="@T(" Plugin.Widgets.SalesCampaigns.SalesCampaignSettings")" asp-default="true">
+            @await Html.PartialAsync("~/Plugins/Widgets.SalesCampaigns/Views/Admin/SalesCampaignSettings.cshtml", Model)
+        </nop-tab>
+
+        <nop-tab asp-name="tab-countdown" asp-title="@T("Plugin.Widgets.SalesCampaigns.Countdowntimer")">
+            <div class="card-body">
+                @*use enum ClockType dropdown*@
+
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <nop-label asp-for="ClockTypeId" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-select asp-for="ClockTypeId" asp-items="@await (((ClockType)Model.ClockTypeId).ToSelectListAsync())" />
+                        <span asp-validation-for="ClockTypeId"></span>
+                    </div>
+                </div>
+            </div>
+        </nop-tab>
+
+        @if (Model.Id > 0)
+        {
+            <nop-tab asp-name="tab-scheduling" asp-title="@T("Plugin.Widgets.SalesCampaigns.Scheduling")">
+                <section class="content">
+                    <div class="container-fluid">
+                        <div class="cards-group">
+                            <div class="card card-default">
+                                <div class="card-header">
+                                    @T("Plugin.Widgets.SalesCampaigns.Schedule")
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group row">
+                                        <div class="col-md-3">
+                                            <nop-label asp-for="FromDate" />
+                                        </div>
+                                        <div class="col-md-9">
+                                            <nop-editor asp-for="FromDate" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-3">
+                                            <nop-label asp-for="ToDate" />
+                                        </div>
+                                        <div class="col-md-9">
+                                            <nop-editor asp-for="ToDate" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card card-default">
+                                <div class="card-header">
+                                    @T("Plugins.Widgets.SalesCampaigns.Fields.SchedulePattern")
+                                </div>
+                                <div class="card-body">
+
+                                    @*use enum SchedulePatternType dropdown*@
+
+                                    <div class="form-group row">
+                                        <div class="col-md-3">
+                                            <nop-label asp-for="SchedulePatternTypeId" />
+                                        </div>
+                                        <div class="col-md-9">
+                                            <nop-select asp-for="SchedulePatternTypeId" asp-items="@await (((SchedulePatternType)Model.SchedulePatternTypeId).ToSelectListAsync())" />
+                                            <span asp-validation-for="SchedulePatternTypeId"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-3">
+                                            <nop-label asp-for="FromTime" />
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input id="FromTime" value="@Model.FromTime.ToString("HH:mm")" title="FromTime" name="FromTime" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-md-3">
+                                            <nop-label asp-for="ToTime" />
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input id="ToTime" value="@Model.ToTime.ToString("HH:mm")" title="ToTime" name="ToTime" />
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="card card-default">
+                                    <div class="card-header">
+                                        @T("Plugin.Widgets.SalesCampaigns.Summary")
+                                    </div>
+                                    <div class="card-body">
+                                        <p>
+                                            @Html.Raw(string.Format(T("Plugin.Widgets.SalesCampaigns.SummaryNotessss").Text, webHelper.GetStoreLocation()))
+                                        </p>
+                                    </div>
+
+                                </div>
+                        </div>
+                    </div>
+                </section>
+            </nop-tab>
+
+            //new tab is added override product condition & preview
+
+            <nop-tab asp-name="tab-override-conditions" asp-title="OverrideProductConditions">
+                @await Html.PartialAsync("~/Plugins/Widgets.SalesCampaigns/Views/Admin/OverrideProduct.cshtml", Model)
+            </nop-tab>
+
+            <nop-tab asp-name="tab-peview" asp-title="Preview">
+                @await Html.PartialAsync("~/Plugins/Widgets.SalesCampaigns/Views/Admin/Preview.cshtml", Model)
+            </nop-tab>
+        }
+
+
+
+    </nop-tabs>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // create FromTime from input HTML element
+        $("#FromTime").kendoTimePicker({
+            dateInput: false
+        });
+    });
+
+    $(document).ready(function () {
+        // create ToTime from input HTML element
+        $("#ToTime").kendoTimePicker({
+            dateInput: false
+        });
+    });
+</script>

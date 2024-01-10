@@ -1,0 +1,84 @@
+﻿@model Nop.Plugin.Widgets.SalesCampaigns.Models.SalesCampaignsModel
+@using Nop.Plugin.Widgets.SalesCampaigns.Models
+
+@inject Nop.Core.IWebHelper webHelper
+@inject IStoreService storeService
+@using Nop.Plugin.Widgets.SalesCampaigns.Domain
+@using Nop.Core.Domain.Catalog;
+@using Nop.Services
+@using Nop.Services.Stores
+
+@{
+    Layout = "";
+}
+
+<input asp-for="Id" type="hidden" />
+@if (Model.Id > 0)
+    {
+<div class="card-body">
+    @await Html.PartialAsync("Table", new DataTablesModel
+    {
+        Name = "overrideproducts-grid",
+        UrlRead = new DataUrl("SalesCampaignsProductList", "SalesCampaigns", new RouteValueDictionary { [nameof(Model.SalesCampaignsProductSearchModel.SalesCampaignId)] = Model.SalesCampaignsProductSearchModel.SalesCampaignId }),
+        UrlDelete = new DataUrl("SalesCampaignsProductDelete", "SalesCampaigns", null),
+        UrlUpdate = new DataUrl("SalesCampaignsProductUpdate", "SalesCampaigns", null),
+        Length = Model.SalesCampaignsProductSearchModel.PageSize,
+        LengthMenu = Model.SalesCampaignsProductSearchModel.AvailablePageSizes,
+        ColumnCollection = new List<ColumnProperty>
+            {
+                new ColumnProperty(nameof(SalesCampaignsProductModel.ProductName))
+                {
+                    Title = T("Plugins.Widgets.SalesCampaigns.Fields.Product").Text
+                },
+                new ColumnProperty(nameof(SalesCampaignsProductModel.IsState))
+                {
+                    Title = T("Plugins.Widgets.SalesCampaigns.Fields.IsState").Text,
+                    Width = "150",
+                    ClassName = NopColumnClassDefaults.CenterAll,
+                    Render = new RenderBoolean(),
+                    Editable = true,
+                    EditType = EditType.Checkbox
+                },
+                new ColumnProperty(nameof(SalesCampaignsProductModel.Id))
+                {
+                    Title = T("Admin.Common.Edit").Text,
+                    Width = "200",
+                    ClassName =  NopColumnClassDefaults.Button,
+                    Render = new RenderButtonsInlineEdit()
+                },
+                new ColumnProperty(nameof(SalesCampaignsProductModel.Id))
+                {
+                    Title = T("Admin.Common.Delete").Text,
+                    Width = "100",
+                    Render = new RenderButtonRemove(T("Admin.Common.Delete").Text),
+                    ClassName = NopColumnClassDefaults.Button
+                }
+            }
+    })
+</div>
+<div class="card-footer">
+    <button type="submit" id="btnAddNewProductSC"
+            onclick="javascript:OpenWindow('@(Url.Action("SalesCampaignsProductAddPopup", "SalesCampaigns", new { salescampaignId = Model.Id, btnId = "btnRefreshProducts", formId = "salesCampaigns-form" }))', 800, 800, true); return false;"
+            class="btn btn-primary">
+        @T("Plugins.Widgets.SalesCampaigns.Categories.Products.AddNew")
+    </button>
+    <button type="submit" id="btnRefreshProducts" style="display: none"></button>
+    <script>
+        $(document).ready(function () {
+            $('#btnRefreshProducts').click(function () {
+                //refresh grid
+                updateTable('#overrideproducts-grid');
+                //return false to don't reload a page
+                return false;
+            });
+        });
+    </script>
+</div>
+}
+    else
+    {
+        <div class="card-body">
+            @T("Plugins.Widgets.SalesCampaigns.Categories.Products.SaveBeforeEdit")
+        </div>
+    }
+

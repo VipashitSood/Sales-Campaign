@@ -1,0 +1,155 @@
+﻿@model Nop.Plugin.Widgets.SalesCampaigns.Models.SalesCampaignsModel
+@using Nop.Plugin.Widgets.SalesCampaigns.Domain
+@{
+    Layout = "";
+}
+
+<link rel="stylesheet" href="~/Plugins/Widgets.SalesCampaigns/Content/css/SalesCampaigns.css" />
+
+<div id="toTime" style="display:none">
+    @(Model.ToTime)
+</div>
+<div id="clocktype" style="display:none">
+    @(Model.ClockTypeId)
+</div>
+<div id="discount">
+    @(Model.DiscountValue)
+</div>
+<br />
+<div id="salefrom" style="display:none">
+    @(Model.FromDate)<br />
+</div>
+
+<div id="to">
+    @(Model.ToDate)
+</div>
+
+
+<script>
+
+    // use for calculating time 
+    var totime = $('#toTime').text();
+    var saleToTime = totime.split(' ')[1];
+    var saleToTimeFormat = totime.split(' ')[2];
+    console.log(saleToTime);
+
+    var hrs = saleToTime.split(':')[0];
+    console.log(hrs);
+    var min = saleToTime.split(':')[1];
+    console.log(min);
+    var sec = saleToTime.split(':')[2];
+    console.log(sec);
+
+    var timeFormat = saleToTimeFormat;
+    console.log(timeFormat);
+
+    $('#toTime').html(saleToTime + saleToTimeFormat);
+
+
+    var data = $('#to').text();
+    var todt = data.split(' ')[0];
+    var toSaleDate = todt.toString();
+
+    var salemonth = todt.split('/')[0];
+    var saledate = todt.split('/')[1];
+    var saleyear = todt.split('/')[2];
+
+    //calculation month from given date in DB
+    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]; // Store month names in array
+    var shortmonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]; // Store short month names in array
+    var d = new Date(todt); // Create date object with current date
+    d.setDate(d.getDate() + 15); // Add 15 days to date object
+    var month = months[d.getMonth()]; // Get month value (Jan = 0, Feb = 1, .etc) then get month string from array
+    var shtmonth = shortmonths[d.getMonth()]; // Get month value (Jan = 0, Feb = 1, .etc) then get month string from array
+   
+    //calculationg week from given date in DB
+    var weekday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]; // Store week names in array
+    var a = new Date(todt);
+    var saleWeek = weekday[a.getDay()];
+
+    var dataValue = $('#salefrom').text();
+    var fromdt = dataValue.split(' ')[0];
+    $('#salefrom').html(fromdt);
+
+    function datediff(to, salefrom) {
+        return Math.round((salefrom - to) / (1000 * 60 * 60 * 24));
+    }
+    function parseDate(str) {
+        var mdsy = str.split('/');
+        console.log(mdsy);
+        return new Date(mdsy[2], mdsy[0] - 1, mdsy[1]);
+    }
+
+    var result = datediff(parseDate(fromdt), parseDate(todt));
+
+    //use to show discount percentage 
+    var disc = $('#discount').text();
+    var valueDisc = disc.split('.')[0];
+    $('#discount').html("-" + valueDisc + "%");
+
+   function makeTimer()
+    {
+        var endTime = todt;
+        endTime = (Date.parse(endTime) / 1000);
+
+        var now = new Date();
+        now = (Date.parse(now) / 1000);
+
+        var timeLeft = endTime - now;
+
+        var days = Math.floor(timeLeft / 86400);
+        var hours = Math.floor((timeLeft - (days * 86400)) / 3600);
+        var minutes = Math.floor((timeLeft - (days * 86400) - (hours * 3600)) / 60);
+        var seconds = Math.floor((timeLeft - (days * 86400) - (hours * 3600) - (minutes * 60)));
+
+        if (hours < "10") { hours = "0" + hours; }
+        if (minutes < "10") { minutes = "0" + minutes; }
+        if (seconds < "10") { seconds = "0" + seconds; }
+
+        $("#days").html(days + "<span>Days</span>");
+        $("#hours").html(hours + "<span>Hours</span>");
+        $("#minutes").html(minutes + "<span>Minutes</span>");
+        $("#seconds").html(seconds + "<span>Seconds</span>");
+
+
+            /*countdown timer statement value*/
+            var clockTypeHtml = "";
+            var clockTypeId = @(Model.ClockTypeId);
+
+            if (clockTypeId == 10) {
+                clockTypeHtml = "Sale ends in " + days + " days," + hours + " hours," + minutes + " minutes," + seconds + " seconds";
+            }
+            else if (clockTypeId == 20) {
+                clockTypeHtml = "Sale ends in " + hours + " hours," + minutes + " minutes," + seconds + " seconds";
+            }
+            else if (clockTypeId == 30) {
+                clockTypeHtml = "Sale ends in " + days + " days";
+            }
+            else if (clockTypeId == 40) {
+                clockTypeHtml = "On Sale until " + saleWeek + ", " + month + " " + saledate + ", " + saleyear + ", " + hrs+ ":" + min + ":" + sec + " " + timeFormat;
+            }
+            else if (clockTypeId == 50) {
+                clockTypeHtml = "On Sale until " + saleWeek + ", " + month  + saledate + ", " + saleyear ;
+            }
+            else if (clockTypeId == 60) {
+                clockTypeHtml = "On Sale until " + shtmonth + " " + saledate + ", " + saleyear + ", " + hrs + ":" + min + ":" + sec + " " + timeFormat;
+            }
+            else if (clockTypeId == 70) {
+                clockTypeHtml = "On Sale until " + shtmonth + " " + saledate + ", " + saleyear;
+            }
+
+           $('#to').html(clockTypeHtml);
+
+    }
+
+    setInterval(function () { makeTimer(); }, 1000);
+
+</script>
+
+
+<ul id="timer" style="display:none">
+    <li id="days"></li>
+    <li id="hours"></li>
+    <li id="minutes"></li>
+    <li id="seconds"></li>
+</ul>

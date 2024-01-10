@@ -1,0 +1,167 @@
+﻿@inject Nop.Core.Domain.Common.AdminAreaSettings adminAreaSettings
+@using Nop.Plugin.Widgets.SalesCampaigns.Models
+@using Nop.Plugin.Widgets.SalesCampaigns.Domain
+@using Nop.Web.Framework.Models.DataTables
+@model SalesCampaignsSearchModel
+@using Nop.Core
+@inject Nop.Services.Common.IGenericAttributeService genericAttributeService
+@inject IWorkContext workContext
+@inject Nop.Core.IWebHelper webHelper
+@{
+    Layout = "_AdminLayout";
+    ViewBag.PageTitle = T("Plugins.Widgets.SalesCampaigns.Admin.Manage.Settings").Text;
+    NopHtml.SetActiveMenuItemSystemName("SalesCampaigns.List");
+}
+<form asp-controller="SalesCampaigns" asp-action="List" method="post" id="salesCampaigns-form">
+    <div class="content-header clearfix">
+
+        <h4 class="float-left">
+            @T("Plugins.Widgets.SalesCampaigns.Admin.Configuration.Settings")
+        </h4>
+
+        <div class="float-right">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus-square"></i>
+                @T("Admin.Common.AddNew")
+            </a>
+            @await Component.InvokeAsync("AdminWidget", new { widgetZone = AdminWidgetZones.WidgetListButtons, additionalData = Model })
+        </div>
+    </div>
+
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="form-horizontal">
+                <nop-cards id="salesCampaigns-cards">
+
+                    <div class="card card-default">
+                        <div class="card-body">
+                            <p>
+                                @Html.Raw(string.Format(T("Plugins.Widgets.SalesCampaigns.Fields.Instructions").Text, webHelper.GetStoreLocation()))
+                            </p>
+                            <hr />
+                        </div>
+                    </div>
+                    <div class="cards-group">
+                        <div class="card card-default">
+                            <div class="card-body">
+                                @await Html.PartialAsync("Table", new DataTablesModel
+                           {
+                               Name = "salesCampaigns-grid",
+                               UrlRead = new DataUrl("List", "SalesCampaigns", null),
+                               UrlDelete = new DataUrl("Delete", "SalesCampaigns", null),
+                               SearchButtonId = "search-records",
+                               Length = Model.PageSize,
+                               LengthMenu = Model.AvailablePageSizes,
+                               Ordering = true,
+                               ServerSide = false,
+                               Filters = new List<FilterParameter>
+                                            {
+                                                new FilterParameter(nameof(Model.SearchCategoryId)),
+                                            },
+                               ColumnCollection = new List<ColumnProperty>
+                                {
+                                    new ColumnProperty(nameof(SalesCampaignsModel.Name))
+                                    {
+                                        Title = T("Plugins.Widgets.SalesCampaigns.Fields.Name").Text,
+                                        Width = "200"
+                                    },
+                                       new ColumnProperty(nameof(SalesCampaignsModel.State))
+                                    {
+                                        Title = T("Plugins.Widgets.SalesCampaigns.Fields.State").Text,
+                                        Width = "150"
+                                    },
+                                        new ColumnProperty(nameof(SalesCampaignsModel.FromDate))
+                                        {
+                                            Title = T("Plugins.Widgets.SalesCampaigns.Fields.FromDate").Text,
+                                            Width = "120",
+                                            Render = new RenderCustom("renderFromDate")
+                                        },
+                                     new ColumnProperty(nameof(SalesCampaignsModel.ToDate))
+                                     {
+                                         Title = T("Plugins.Widgets.SalesCampaigns.Fields.ToDate").Text,
+                                         Width = "120",
+                                         Render = new RenderCustom("renderToDate")
+                                     },
+                                     new ColumnProperty(nameof(SalesCampaignsModel.SchedulePattern))
+                                    {
+                                        Title = T("Plugins.Widgets.SalesCampaigns.Fields.SchedulePattern").Text,
+                                        Width = "150"
+                                    },
+                                     new ColumnProperty(nameof(SalesCampaignsModel.ActionTypeId))
+                                        {
+                                            Title = T("Plugins.Widgets.SalesCampaigns.Fields.Action").Text,
+                                            Width = "350",
+                                            ClassName =  NopColumnClassDefaults.Button,
+                                            Render = new RenderCustom("renderActionType")
+                                       },
+                                    new ColumnProperty(nameof(SalesCampaignsModel.Command))
+                                    {
+                                        Title = T("Plugins.Widgets.SalesCampaigns.Fields.Command").Text,
+                                        Width = "100",
+                                        ClassName =  NopColumnClassDefaults.Button,
+                                        Render = new RenderCustom("renderColumnBtns")
+                                    }
+
+                               }
+                           })
+
+                            </div>
+                            <script>
+
+                                function renderActionType(data, type, row, meta) {
+                                    var editlink = '@Url.Content("~/Admin/SalesCampaigns/Edit/")' + row.Id;
+                                    var viewlink = '@Url.Content("~/Admin/SalesCampaigns/ViewSalesCampaigns/")' + row.Id;
+                                    var schedule = '@Url.Content("~/Admin/SalesCampaigns/Schedule/")' + row.Id;
+                                    var unschedule = '@Url.Content("~/Admin/SalesCampaigns/Schedule/")' + row.Id;
+                                    var start = '@Url.Content("~/Admin/SalesCampaigns/StartImmediately/")' + row.Id;
+                                    var stop = '@Url.Content("~/Admin/SalesCampaigns/StartImmediately/")' + row.Id;
+
+                                    if (row.CampaignStateId == @((int)CampaignStateType.Pending)) {
+                                        return '<a class="btn btn-default"  href="' + schedule + '"><i class="k-icon k-i-calendar"></i> @T("Plugins.Widgets.SalesCampaigns.Fields.Action.Schedule").Text</a>  <a class="btn btn-default"  href="' + start + '"><i class="k-icon k-i-arrow-e"></i>@T("Plugins.Widgets.SalesCampaigns.Fields.Action.StartImmediately").Text</a>';
+                                    }
+                                    else if (row.CampaignStateId == @((int)CampaignStateType.Scheduled)) {
+                                        return '<a class="btn btn-default"  href="' + unschedule + '"><i class="k-icon k-i-exception"></i> @T("Plugins.Widgets.SalesCampaigns.Fields.Action.Unschedule").Text</a>  <a class="btn btn-default"  href="' + start + '"><i class="k-icon k-i-arrow-e"></i>@T("Plugins.Widgets.SalesCampaigns.Fields.Action.StartImmediately").Text</a>';
+                                    }
+                                    else if (row.CampaignStateId == @((int)CampaignStateType.Running)) {
+                                        return '<a class="btn btn-default"  href="' + stop + '"><i class="k-icon k-i-exception"></i> @T("Plugins.Widgets.SalesCampaigns.Fields.Action.StopImmediately").Text</a>';
+                                    }
+                                }
+
+                                function renderColumnBtns(data, type, row, meta) {
+                                    var editlink = '@Url.Content("~/Admin/SalesCampaigns/Edit/")' + row.Id;
+                                    var viewlink = '@Url.Content("~/Admin/SalesCampaigns/ViewSalesCampaigns/")' + row.Id;
+                                    if (row.CampaignStateId == @((int)CampaignStateType.Pending)) {
+                                        return '<a class="btn btn-default"  href="' + editlink + '"><i class="fas fa-pencil-alt"></i> @T("Plugins.Widgets.SalesCampaigns.Edit").Text</a>';
+                                    }
+                                    else if (row.CampaignStateId == @((int)CampaignStateType.Scheduled) || row.CampaignStateId == @((int)CampaignStateType.Running) ) {
+                                        return '<a class="btn btn-default"  href="' + viewlink + '"><i class="far fa-eye"></i> @T("Plugins.Widgets.SalesCampaigns.View").Text</a>';
+                                    }
+                                }
+
+                                function renderFromDate(data, type, row, meta) {
+                                    if (data == '0001-01-01T00:00:00') {
+                                        return "N/A";
+                                    }
+                                    return data.replace('T00:00:00', '');
+                                }
+
+                                function renderToDate(data, type, row, meta) {
+                                    if (data == '0001-01-01T00:00:00') {
+                                        return "N/A";
+                                    }
+                                    return data.replace('T00:00:00', '');
+                                }
+                            </script>
+
+                         
+                            <nop-alert asp-alert-id="deleteSelectedFailed" />
+                            <nop-alert asp-alert-id="nothingSelectedAlert" />
+                        </div>
+                    </div>
+
+                </nop-cards>
+            </div>
+        </div>
+    </section>
+</form>
